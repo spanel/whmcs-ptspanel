@@ -141,6 +141,7 @@ function ptspanel_ALL($params) {
     if ($action == 'renew') {
       $res = phi_http_request("call", "$urlp/renew_license",
                               array("args" => array(
+                                                    "id"            => $lid,
                                                     "billing_cycle" => strtolower($row['billingcycle']),
                                                     "expire_time"   => $row['nextduedate_u'],
                                                     )),
