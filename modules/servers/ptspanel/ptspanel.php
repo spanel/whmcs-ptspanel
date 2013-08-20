@@ -13,22 +13,26 @@
 #
 # 1. Obtain a reseller account from <licensing@spanel.info>.
 #
-# 1. Upload the ptspanel/ directory into the modules/servers/ folder of your
+# 2. Upload the ptspanel/ directory into the modules/servers/ folder of your
 #    WHMCS installation.
 #
-# 2. Create two products, e.g. called "Spanel physical server license" and
+# 3. Activate the provisioning module from your WHMCS. Enter username and
+#    password given in step 1, which will be used to access the API at
+#    our license server at http://spanel.info .
+
+# 4. Create two products, e.g. called "Spanel physical server license" and
 #    "Spanel VPS license". Set the module for these products to "ptspanel". Fill
 #    out the reseller username and password given in step #1. Also fill the
 #    product name, which must be exactly "Spanel physical server license" for
 #    the first one, and "Spanel VPS license" for the second one.
 #
-# 3. That's it. Now clients just need to order from your WHMCS installation.
+# 5. That's it. Now clients just need to order from your WHMCS installation.
 #    When the order is processed and the product is created, license ID will
 #    appear in the Subscription ID field in the product page. This license ID
 #    can be used to install Spanel (see http://spanel.info/ on Spanel
 #    installation instruction).
 #
-# 4. To reset the license IP (e.g. the server changes IP or you want to reuse
+# 6. To reset the license IP (e.g. the server changes IP or you want to reuse
 #    the license to another machine), you can press the [Create] button again.
 #    To prevent abuse, there is a limit on the number of IP resets you can do.
 #
