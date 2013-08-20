@@ -2,7 +2,7 @@
 
 # WHMCS provisioning module for PT Spanel's products (mainly Spanel licenses)
 #
-# Version: 0.01
+# Version: 0.02
 #
 # This software is copyright (c) 2013 by PT Spanel (contact: <info@spanel.info>)
 #
