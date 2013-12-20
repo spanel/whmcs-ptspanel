@@ -56,7 +56,7 @@ function ptspanel_ALL($params) {
   $hid     = $params['serviceid'];
 
   // $urlp = "https://spanel.info/api/Spanel/License/Server/create_license;debug".json_encode(array($params)),
-  $urlp = "https://spanel.info/api/Spanel/License/Server";
+  $urlp = "https://spanel.info/api";
   $np = "Performed by WHMCS module ptspanel, admin=(id=$_SESSION[adminid]), ip=$_SERVER[REMOTE_ADDR], service ID=$hid"; // noteprefix
 
   # phi client options
@@ -179,5 +179,3 @@ function ptspanel_Renew($params)            { ptspanel_ALL($params); }
 # AdminServicesTabFields
 
 # AdminServicesTabFieldsSave
-
-
