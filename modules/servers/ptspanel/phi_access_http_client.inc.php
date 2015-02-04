@@ -2,13 +2,14 @@
 
 # Riap::HTTP client.
 #
-# Version: 20130308.1
-#
-# This software is copyright (c) 2013 by Steven Haryanto,
+# This software is copyright (c) 2013-2014 by Steven Haryanto,
 # <stevenharyanto@gmail.com>.
 #
 # This is free software; you can redistribute it and/or modify it under the
 # Artistic License 2.0.
+#
+# For more information about Riap::HTTP protocol, see
+# https://metacpan.org/module/Riap::HTTP
 #
 # Usage examples:
 #
@@ -23,12 +24,18 @@
 # other known copts:
 # - retries (int, default 2)
 # - retry_delay (int, default 3)
+# - ssl_verify_host (bool, can also be set to 0 to disable hostname checking, useful if you use dummy certificate where hostname doesn't match IP)
+# - debug (bool, if set to true will turn on CURLOPT_VERBOSE)
 
 # todo:
 # - support log viewing
 # - support proxy
 
+$PHINCI_VERSION = '20150130.1';
+
 function phi_http_request($action, $url, $extra=array(), $copts=array()) {
+  global $PHINCI_VERSION;
+
   if (!extension_loaded("curl")) die("curl extension required");
 
   # copts
@@ -36,7 +43,7 @@ function phi_http_request($action, $url, $extra=array(), $copts=array()) {
   $retry_delay = isset($copts['retry_delay']) ? $copts['retry_delay'] : 3;
 
   # form riap request
-  $rreq = array('action' => $action, 'ua' => 'Phinci');
+  $rreq = array('action' => $action, 'ua' => "Phinci/$PHINCI_VERSION");
   foreach($extra as $k => $v) { $rreq[$k] = $v; }
 
   # put all riap request keys, except some like args, to http headers
@@ -71,7 +78,7 @@ function phi_http_request($action, $url, $extra=array(), $copts=array()) {
   # put args in form fields
   $postfields = array();
   foreach ($args as $k => $v) {
-    if (!isset($v) || is_array($v)) {
+    if (!isset($v) || is_array($v) || is_object($v)) {
       $postfields["$k:j"] = json_encode($v);
     } else {
       $postfields[$k] = $v;
@@ -85,6 +92,8 @@ function phi_http_request($action, $url, $extra=array(), $copts=array()) {
   }
   # ==
 
+  $debug = isset($copts['debug']) && $copts['debug'];
+
   $attempts = 0;
   $do_retry = true;
   while (true) {
@@ -92,7 +101,7 @@ function phi_http_request($action, $url, $extra=array(), $copts=array()) {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    curl_setopt($ch, CURLOPT_VERBOSE, 0);
+    curl_setopt($ch, CURLOPT_VERBOSE, $debug);
     curl_setopt($ch, CURLOPT_POST, 1);
     #curl_setopt($ch, CURLOPT_POSTFIELDS, $args_s);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $postfields_s);
@@ -104,6 +113,8 @@ function phi_http_request($action, $url, $extra=array(), $copts=array()) {
     if (preg_match('/^https/i', $url)) {
       if (isset($copts['ssl_verify_peer']) && !$copts['ssl_verify_peer'])
           curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+      if (isset($copts['ssl_verify_host']) && !$copts['ssl_verify_host'])
+          curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
     }
     $cres = curl_exec($ch);
     $cinfo = curl_getinfo($ch);
@@ -128,7 +139,23 @@ function phi_http_request($action, $url, $extra=array(), $copts=array()) {
     sleep($retry_delay);
   }
 
+  $ver = 1.1;
+  if (isset($res[3]) && $res[3]['riap.v']) $ver = $res[3]['riap.v'];
+  if ($ver >= 1.2) {
+    # strip riap.* keys from result metadata
+    foreach ($res[3] as $k => $val) {
+      if (!preg_match('/\Ariap\./', $k)) continue;
+      if ($k == 'riap.v') {
+      } elseif ($k == 'riap.result_encoding') {
+        if ($val != 'base64') return array(501, "Unknown result_encoding '$val', only 'base64' is supported");
+        $res[2] = base64_decode($res[2]);
+      } else {
+        return array(501, "Unknown Riap attribute in result metadata '$k'");
+      }
+      unset($res[3][$k]);
+    }
+  }
+
   #echo "D2\n";
   return $res;
 }
-
