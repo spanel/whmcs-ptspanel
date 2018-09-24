@@ -38,7 +38,7 @@
 #
 # For questions/support, please contact <support@spanel.info>.
 
-require_once "phi_access_http_client.inc.php";
+require_once __DIR__ . "/../../../includes/phi_access_http_client.inc.php";
 
 function ptspanel_ConfigOptions() {
   $configarray = array(
